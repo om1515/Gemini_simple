@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Chat with Gemini AI</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <script>
+        function askQuestion() {
+            var question = document.getElementById("question").value;
+            if (!question.trim()) {
+                alert("Please enter a question.");
+                return;
+            }
+
+            document.getElementById("response").innerHTML = "<div class='text-secondary'>Processing...</div>";
+
+            fetch("/ask", {
+                method: "POST",
+                body: new URLSearchParams({ question: question }),
+                headers: { "Content-Type": "application/x-www-form-urlencoded" }
+            })
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById("response").innerHTML = "<div class='alert alert-light border'>" + data + "</div>";
+            })
+            .catch(error => {
+                document.getElementById("response").innerHTML = "<div class='alert alert-danger'>Error fetching response.</div>";
+            });
+        }
+    </script>
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            max-width: 1000px;
+            margin-top: 50px;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        .chat-box {
+            height: 400px; /* Large response area */
+            overflow-y: auto;
+            border: 1px solid #ccc;
+            padding: 15px;
+            border-radius: 5px;
+            background: #f0f0f0;
+        }
+        .pdf-list {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            padding: 10px;
+            border-radius: 5px;
+            background: #f8f9fa;
+        }
+        .sidebar {
+            border-right: 2px solid #ddd;
+            padding-right: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2 class="text-center mb-4">📄 PDF Chat with Gemini AI</h2>
+
+        <div class="row">
+            <!-- LEFT COLUMN (30%) - PDF Upload & File List -->
+            <div class="col-md-4 sidebar">
+                <h4>📂 Upload a PDF</h4>
+                <form action="/" method="post" enctype="multipart/form-data" class="mb-3">
+                    <div class="input-group">
+                        <input type="file" name="pdf" class="form-control">
+                        <button class="btn btn-primary" type="submit">Upload</button>
+                    </div>
+                </form>
+
+                {% if uploaded_pdfs %}
+                <h5>📜 Uploaded Files</h5>
+                <div class="pdf-list">
+                    <ul class="list-group">
+                        {% for pdf in uploaded_pdfs %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            {{ pdf }}
+                            <form action="{{ url_for('remove_file', filename=pdf) }}" method="post">
+                                <button type="submit" class="btn btn-danger btn-sm">Remove</button>
+                            </form>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- RIGHT COLUMN (70%) - AI Chat -->
+            <div class="col-md-8">
+                {% if pdf_uploaded %}
+                <h4>💬 Chat with AI</h4>
+                <div class="input-group mb-3">
+                    <input type="text" id="question" class="form-control" placeholder="Type your question...">
+                    <button class="btn btn-success" onclick="askQuestion()">Ask</button>
+                </div>
+
+                <!-- AI Response Section -->
+                <h5>📜 AI Response</h5>
+                <div id="response" class="chat-box"></div>
+                {% else %}
+                <p class="text-muted">📌 Upload a PDF first to start chatting.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</body>
+</html>
