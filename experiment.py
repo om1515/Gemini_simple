@@ -4,7 +4,7 @@ import simpleaudio as sa
 import requests
 
 # Configure Gemini API
-genai.configure(api_key="AIzaSyAG0o2KrxbXbsdqeyZ5rz9NpWDIRTk8Rtc")
+genai.configure(api_key="")
 
 def get_audio_response(text):
     model = genai.GenerativeModel("models/gemini-2.0-flash-exp")
